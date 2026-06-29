@@ -1,4 +1,4 @@
-const CACHE_NAME = "truthteller-v1";
+const CACHE_NAME = "truthteller-v2";
 const ASSETS = [
   "./",
   "./index.html",
