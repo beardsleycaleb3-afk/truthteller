@@ -2,6 +2,7 @@ const CACHE_NAME = "truthteller-v1";
 const ASSETS = [
   "./",
   "./index.html",
+  "./icon.png
   "./manifest.json",
   "./SW.js"
 ];
