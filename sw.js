@@ -2,9 +2,9 @@ const CACHE_NAME = "truthteller-v1";
 const ASSETS = [
   "./",
   "./index.html",
-  "./icon.png
+  "./icon.png",
   "./manifest.json",
-  "./SW.js"
+  "./sw.js"
 ];
 
 self.addEventListener("install", event => {
