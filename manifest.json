@@ -1,0 +1,11 @@
+{
+  "name": "truthteller",
+  "short_name": "truthteller",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#060608",
+  "background_color": "#060608"
+}
