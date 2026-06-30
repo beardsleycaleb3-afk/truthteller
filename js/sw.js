@@ -1,4 +1,4 @@
-const CACHE = 'truthteller-v3';
+const CACHE = 'truthteller-v4';
 const ASSETS = [
   './index.html',
   './manifest.json',
