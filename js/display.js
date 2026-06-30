@@ -40,4 +40,4 @@ export function toggleResults(box, show) {
 export function setOverlay(node, text, show) {
   node.textContent = text;
   node.style.display = show ? 'flex' : 'none';
-}
+}}
