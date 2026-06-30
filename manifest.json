@@ -2,15 +2,14 @@
   "name": "truthteller",
   "short_name": "truthteller",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#060608",
-  "background_color": "#060608",
+  "background_color": "#05080a",
+  "theme_color": "#05080a",
   "icons": [
     {
       "src": "./icon.png",
-      "sizes": "192x192",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
