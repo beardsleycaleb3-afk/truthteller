@@ -1,28 +1,18 @@
 // function.js — pure transforms over token arrays. No DOM, no I/O.
 
 export function summarize(tokens) {
-  const customWordMap = {};
-  tokens.forEach(t => {
-    if (!customWordMap[t.raw]) {
-      customWordMap[t.raw] = {
-        dictionaryMeaning: t.externalDefinition,
-        phoneticSpelling: t.externalPhonetic,
-        hasStructuralPrefix: !!t.prefixStructuralRole,
-        hasStructuralSuffix: !!t.suffixStructuralRole
-      };
-    }
-  });
-
   return {
     total: tokens.length,
     vowels: tokens.filter(t => t.isVowel).length,
     consonants: tokens.filter(t => !t.isVowel).length,
     finals: tokens.filter(t => t.isFinalForm).length,
-    sequence: tokens.map(t => t.letter).join(' \u2192 '),
-    structuralComparisonMatrix: customWordMap
+    sequence: tokens.map(t => t.letter).join(' \u2192 ')
   };
 }
 
+// Stitches each letter's clause into one combined narrative sentence,
+// e.g. "It initiates with a primal stroke...; then it establishes a
+// balanced enclosure...; finally it seals the entire consciousness..."
 export function buildCombined(tokens) {
   if (!tokens.length) return '';
   const last = tokens.length - 1;
