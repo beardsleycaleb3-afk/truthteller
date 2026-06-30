@@ -1,6 +1,25 @@
-// token.js — glyph data tables + raw string tokenization.
+// token.js — glyph tables + contextual LUT processors + live dictionary integration.
 
 export const VOWELS = new Set(['A', 'E', 'I', 'O', 'U', 'Y']);
+
+// 1. Linguistic Look-Up Tables (LUT)
+export const LINGUISTIC_LUT = {
+  prefixes: {
+    "UN": "reversal, negation, or uncovering of an established state",
+    "DE": "downward motion, removal, or systematic reduction",
+    "RE": "repetition, backward iteration, or restoration of a state"
+  },
+  suffixes: {
+    "ING": "continuous operational execution, active state initialization",
+    "ED": "historical baseline, grounded or finalized sequence state",
+    "LY": "characteristic execution layer, defining behavioral manner"
+  },
+  vowelSounds: {
+    "A_LONG": "open air-stroke, clear declaration of initialization",
+    "E_SILENT": "latent anchor, wordless potential holding structural space",
+    "O_DOUBLE": "harmonic resonance cavity, deepening structural frequency"
+  }
+};
 
 export const REGULAR = {
   A: ["Aleph's Ox-Lowing Breath", 'initiates with a primal stroke of leadership, birthing the beginning'],
@@ -39,6 +58,29 @@ export const FINAL = {
   K: ['Final Kaf (Illuminated Terminal)', 'extends the palm downward, grounding all gathered spiritual light directly into execution']
 };
 
+export const CONTEXTUAL_OVERRIDES = {
+  SILENT_ALEPH: ["Silent Aleph", "breathes a wordless presence, suspending sound to allow space for spiritual observation"],
+  SAMEKH_OVERRIDE: ["Samekh's Firm Support", "props up options and opportunities under a watchful eye, creating a stable pillar"]
+};
+
+// 2. Dynamic AI-Helper: Real-time public API lookups
+export async function fetchExternalDefinition(word) {
+  const cleanWord = String(word || '').trim().toLowerCase().replace(/[^a-z]/g, '');
+  if (!cleanWord) return { definition: "invalid sequence", phonetic: "" };
+
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanWord}`);
+    if (!response.ok) throw new Error("Not found");
+    const data = await response.json();
+    
+    const meaning = data[0]?.meanings[0]?.definitions[0]?.definition || "no definition found";
+    const phonetic = data[0]?.phonetic || data[0]?.phonetics?.find(p => p.text)?.text || "";
+    return { definition: meaning, phonetic };
+  } catch (err) {
+    return { definition: "custom raw or proprietary term", phonetic: "" };
+  }
+}
+
 export function splitTokens(raw) {
   return String(raw || '')
     .split(/[\n,;/|]+/)
@@ -46,16 +88,60 @@ export function splitTokens(raw) {
     .filter(Boolean);
 }
 
-// Explodes every word into its individual letters (not just one letter per
-// comma/line-separated chunk), so e.g. "MOON" becomes 4 tokens: M, O, O, N.
-// The very last letter of the very last word is checked against FINAL forms.
-export function tokenize(raw) {
+/**
+ * Tokenizes arrays with embedded LUT context mapping.
+ * Note: pass externalDictionaryMap down from your asynchronous view controller loop.
+ */
+export function tokenize(raw, externalDictionaryMap = {}) {
   const words = splitTokens(raw);
   const letters = [];
+
   words.forEach((word, wordIndex) => {
-    const chars = word.toUpperCase().match(/[A-Z]/g) || [];
+    const upperWord = word.toUpperCase();
+    const dictionaryData = externalDictionaryMap[upperWord] || { definition: "pending external sync", phonetic: "" };
+
+    // Detect structural prefix and suffix matches from our LUT
+    let activePrefix = Object.keys(LINGUISTIC_LUT.prefixes).find(p => upperWord.startsWith(p)) || null;
+    let activeSuffix = Object.keys(LINGUISTIC_LUT.suffixes).find(s => upperWord.endsWith(s)) || null;
+
+    const chars = upperWord.match(/[A-Z]/g) || [];
+    
     chars.forEach((letter, charIndex) => {
-      letters.push({ word, wordIndex, letter, charIndex });
+      let overrideEntry = null;
+      let soundProfile = "standard";
+
+      const nextLetter = chars[charIndex + 1];
+      const prevLetter = chars[charIndex - 1];
+      const isWordEnd = charIndex === chars.length - 1;
+
+      // Rule: Identify "EL E" style or terminal silent layouts
+      if (letter === 'E' && isWordEnd && chars.length > 1) {
+        overrideEntry = CONTEXTUAL_OVERRIDES.SILENT_ALEPH;
+        soundProfile = LINGUISTIC_LUT.vowelSounds.E_SILENT;
+      }
+
+      // Rule: Double vowel tracking (e.g. OO in TOO or TWO rules)
+      if (letter === 'O' && (nextLetter === 'O' || prevLetter === 'O')) {
+        soundProfile = LINGUISTIC_LUT.vowelSounds.O_DOUBLE;
+      }
+
+      // Rule: Homophone context matching (Force S to Samekh on 'TO' / 'TOO' configurations)
+      if (letter === 'S' && (upperWord === 'TO' || upperWord === 'TOO')) {
+        overrideEntry = CONTEXTUAL_OVERRIDES.SAMEKH_OVERRIDE;
+      }
+
+      letters.push({
+        word,
+        upperWord,
+        wordIndex,
+        letter,
+        charIndex,
+        overrideEntry,
+        soundProfile,
+        prefixNotes: activePrefix ? LINGUISTIC_LUT.prefixes[activePrefix] : null,
+        suffixNotes: activeSuffix ? LINGUISTIC_LUT.suffixes[activeSuffix] : null,
+        dictionaryData
+      });
     });
   });
 
@@ -63,16 +149,24 @@ export function tokenize(raw) {
   return letters.map((item, i) => {
     const isLast = i === total - 1;
     const finalEntry = isLast ? FINAL[item.letter] : undefined;
-    const entry = finalEntry || REGULAR[item.letter];
+    const entry = item.overrideEntry || finalEntry || REGULAR[item.letter];
+
     return {
       raw: item.word,
       wordIndex: item.wordIndex,
       letter: item.letter,
       isLast,
-      isFinalForm: isLast && !!finalEntry,
+      isFinalForm: isLast && !!finalEntry && !item.overrideEntry,
       isVowel: VOWELS.has(item.letter),
       title: entry ? entry[0] : `Unknown Glyph (${item.letter})`,
-      detail: entry ? entry[1] : 'unmapped token'
+      detail: entry ? entry[1] : 'unmapped token',
+      
+      // Expanded Linguistic properties mapped from structural LUTs
+      soundProfile: item.soundProfile,
+      prefixStructuralRole: item.prefixNotes,
+      suffixStructuralRole: item.suffixNotes,
+      externalDefinition: item.dictionaryData.definition,
+      externalPhonetic: item.dictionaryData.phonetic
     };
   });
 }
