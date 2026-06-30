@@ -126,3 +126,4 @@ export function createEngine(canvas) {
 
   return { start, stop, resize };
 }
+  }
