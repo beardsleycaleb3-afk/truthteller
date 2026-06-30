@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=350, height=550, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#05080a">
+<link rel="manifest" href="./manifest.json">
+<title>truthteller</title>
+<style>
+  :root{
+    --bg:#05080a;
+    --panel:#0d1410;
+    --border:#1c2620;
+    --text:#cdeede;
+    --muted:#5d7a6c;
+    --phos:#3ac486;
+    --amber:#c48a3a;
+    --purple:#8a3ac4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;}
+  html,body{width:350px;height:550px;overflow:hidden;background:var(--bg);color:var(--text);touch-action:none;user-select:none;}
+  #app{width:100%;height:100%;}
+  .shell{
+    width:350px;height:550px;display:flex;flex-direction:column;
+    padding:8px;gap:6px;
+    background:radial-gradient(circle at 50% 0%,rgba(58,196,134,.08),transparent 55%),var(--bg);
+  }
+  .titlebar{display:flex;justify-content:space-between;align-items:center;padding:2px 4px;}
+  .logo{font-size:.95rem;letter-spacing:2px;text-transform:lowercase;color:var(--text);font-weight:700;}
+  .ver{font-size:.6rem;color:var(--phos);background:rgba(58,196,134,.12);border:1px solid rgba(58,196,134,.35);padding:2px 6px;border-radius:4px;letter-spacing:1px;}
+
+  .monitor{display:flex;flex-direction:column;align-items:center;}
+  .bezel{
+    width:316px;height:216px;
+    background:linear-gradient(145deg,#2a2e2c,#151816);
+    border-radius:14px;
+    border:1px solid #34382f;
+    box-shadow:0 8px 18px rgba(0,0,0,.6), inset 0 0 0 6px #1b1e1c;
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    touch-action:none;
+  }
+  #screen{width:300px;height:200px;border-radius:4px;background:#020403;display:block;box-shadow:inset 0 0 16px rgba(0,0,0,.8);touch-action:none;}
+  .scanglass{
+    position:absolute;inset:8px;border-radius:4px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 30%,transparent 70%,rgba(0,0,0,.25));
+    box-shadow:inset 0 0 28px rgba(0,0,0,.55);
+  }
+  .overlay-text{
+    position:absolute;inset:8px;display:flex;align-items:center;justify-content:center;
+    font-size:.72rem;letter-spacing:1px;color:var(--phos);text-shadow:0 0 6px rgba(58,196,134,.6);
+    pointer-events:none;
+  }
+  .stand{width:60px;height:8px;background:#1b1e1c;border-radius:0 0 6px 6px;margin-top:-2px;}
+
+  .controls{display:flex;gap:6px;}
+  input[type=text]{
+    flex:1;background:#02050a;border:1px solid var(--border);color:var(--text);
+    padding:10px 8px;font-size:.85rem;border-radius:6px;text-transform:uppercase;
+    letter-spacing:.5px;text-align:center;outline:none;
+  }
+  .btn{
+    flex:1;min-height:40px;border:none;border-radius:6px;font-weight:700;
+    text-transform:uppercase;font-size:.68rem;letter-spacing:1px;color:#04150c;
+  }
+  .btn.primary{background:var(--phos);flex:0 0 78px;}
+  .btn.sec{background:transparent;border:1px solid var(--border);color:var(--text);}
+
+  .results{flex:1;display:flex;flex-direction:column;gap:6px;overflow:hidden;display:none;}
+  .section-title{font-size:.62rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:3px;}
+  .stream{flex:0 1 auto;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+  .stream::-webkit-scrollbar{width:5px;}
+  .stream::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;padding:7px;}
+  .card.sof{border-color:var(--amber);}
+  .glyph{display:inline-flex;width:24px;height:24px;background:var(--border);border-radius:5px;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;margin-bottom:4px;}
+  .card.sof .glyph{color:var(--amber);background:rgba(196,138,58,.15);}
+  .det{font-size:.72rem;line-height:1.3;}
+  .desc{color:var(--muted);}
+  .sub{font-size:.6rem;color:var(--muted);font-style:italic;margin-top:2px;}
+  .summary{background:rgba(58,196,134,.06);border-left:3px solid var(--phos);padding:7px 8px;font-size:.68rem;line-height:1.35;border-radius:0 5px 5px 0;}
+  .combined{background:rgba(138,58,196,.07);border-left:3px solid var(--purple);padding:7px 8px;font-size:.68rem;line-height:1.4;border-radius:0 5px 5px 0;}
+  .seq{margin-top:3px;color:var(--phos);}
+  .muted{color:var(--muted);}
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
